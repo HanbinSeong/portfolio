@@ -93,8 +93,8 @@ export default function App() {
             <div className="hidden md:flex gap-8 text-sm font-medium text-gray-500">
               <a href="#about" className="hover:text-black transition-colors">About</a>
               <a href="#skills" className="hover:text-black transition-colors">Skills</a>
-              <a href="#projects" className="hover:text-black transition-colors">Projects</a>
               <a href="#experience" className="hover:text-black transition-colors">Experience</a>
+              <a href="#projects" className="hover:text-black transition-colors">Projects</a>
             </div>
             <PDFDownloadLink
               document={<PortfolioPDF />}
@@ -210,6 +210,48 @@ export default function App() {
                 className="px-5 py-2.5 rounded-md font-bold text-sm shadow-sm flex items-center gap-2 cursor-default select-none"
               >
                 <span className="tracking-wider">{skill.name}</span>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* Experience Section */}
+        <section id="experience" className="mb-32 scroll-mt-32">
+          <div className="flex items-center gap-3 mb-12">
+            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+              <Briefcase size={24} />
+            </div>
+            <h2 className="text-3xl font-bold">Experience</h2>
+          </div>
+          <div className="space-y-8">
+            {EXPERIENCES.map((exp, index) => (
+              <motion.div
+                key={exp.role || index}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="relative pl-8 border-l-2 border-gray-100 pb-8 last:pb-0"
+              >
+                <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-blue-600 border-4 border-white shadow-sm" />
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
+                  <div>
+                  {exp.role && (
+                    <h3 className="text-xl font-bold">{exp.role}</h3>
+                  )}
+                  {exp.company && (
+                    <p className="text-blue-600 font-semibold">{exp.company}</p>
+                  )}
+                  </div>
+                  <span className="text-sm font-medium text-gray-400 mt-1 md:mt-0">{exp.period}</span>
+                </div>
+                <ul className="space-y-2">
+                  {exp.description.map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-gray-600">
+                      <ChevronRight size={18} className="mt-1 flex-shrink-0 text-blue-400" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
               </motion.div>
             ))}
           </div>
@@ -416,48 +458,6 @@ export default function App() {
                     </Markdown>
                   </div>
                 </div>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
-        {/* Experience Section */}
-        <section id="experience" className="mb-32 scroll-mt-32">
-          <div className="flex items-center gap-3 mb-12">
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-              <Briefcase size={24} />
-            </div>
-            <h2 className="text-3xl font-bold">Experience</h2>
-          </div>
-          <div className="space-y-8">
-            {EXPERIENCES.map((exp, index) => (
-              <motion.div
-                key={exp.role || index}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="relative pl-8 border-l-2 border-gray-100 pb-8 last:pb-0"
-              >
-                <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-blue-600 border-4 border-white shadow-sm" />
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
-                  <div>
-                  {exp.role && (
-                    <h3 className="text-xl font-bold">{exp.role}</h3>
-                  )}
-                  {exp.company && (
-                    <p className="text-blue-600 font-semibold">{exp.company}</p>
-                  )}
-                  </div>
-                  <span className="text-sm font-medium text-gray-400 mt-1 md:mt-0">{exp.period}</span>
-                </div>
-                <ul className="space-y-2">
-                  {exp.description.map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-gray-600">
-                      <ChevronRight size={18} className="mt-1 flex-shrink-0 text-blue-400" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
               </motion.div>
             ))}
           </div>

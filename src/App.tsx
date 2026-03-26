@@ -18,10 +18,13 @@ import {
   X,
   Play,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  FileDown
 } from "lucide-react";
 import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { PortfolioPDF } from "./components/PortfolioPDF.tsx";
 import { PERSONAL_INFO, SKILLS, PROJECTS, EXPERIENCES } from "./constants";
 
 export default function App() {
@@ -86,11 +89,29 @@ export default function App() {
       <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <span className="font-bold text-xl tracking-tight">PORTFOLIO</span>
-          <div className="hidden md:flex gap-8 text-sm font-medium text-gray-500">
-            <a href="#about" className="hover:text-black transition-colors">About</a>
-            <a href="#skills" className="hover:text-black transition-colors">Skills</a>
-            <a href="#projects" className="hover:text-black transition-colors">Projects</a>
-            <a href="#experience" className="hover:text-black transition-colors">Experience</a>
+          <div className="flex items-center gap-4 md:gap-8">
+            <div className="hidden md:flex gap-8 text-sm font-medium text-gray-500">
+              <a href="#about" className="hover:text-black transition-colors">About</a>
+              <a href="#skills" className="hover:text-black transition-colors">Skills</a>
+              <a href="#projects" className="hover:text-black transition-colors">Projects</a>
+              <a href="#experience" className="hover:text-black transition-colors">Experience</a>
+            </div>
+            <PDFDownloadLink
+              document={<PortfolioPDF />}
+              fileName={`portfolio_${PERSONAL_INFO.name.split(' ')[0]}.pdf`}
+            >
+              {({ loading }) => (
+                <button
+                  disabled={loading}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-bold hover:bg-blue-700 transition-all shadow-sm no-print disabled:opacity-50"
+                >
+                  <FileDown size={16} />
+                  <span className="hidden sm:inline">
+                    {loading ? "생성 중..." : "PDF 추출"}
+                  </span>
+                </button>
+              )}
+            </PDFDownloadLink>
           </div>
         </div>
       </nav>
@@ -387,6 +408,14 @@ export default function App() {
                     </motion.div>
                   )}
                 </AnimatePresence>
+                {/* Print-only detail view (always visible when printing) */}
+                <div className="hidden print:block p-8 md:p-12 border-t border-gray-100 bg-white">
+                  <div className="prose prose-slate prose-sm max-w-none text-[#37352f]">
+                    <Markdown rehypePlugins={[rehypeRaw]}>
+                      {project.content}
+                    </Markdown>
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>

@@ -15,3 +15,59 @@
     @apply antialiased text-[#37352f] bg-white;
   }
 }
+
+@media print {
+  /* Hide navigation, footer, and interactive buttons */
+  nav, footer, button, .no-print {
+    display: none !important;
+  }
+
+  /* Reset layout for print */
+  main {
+    padding-top: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  section {
+    page-break-inside: avoid;
+    margin-bottom: 2rem !important;
+  }
+
+  /* Ensure background colors and images are printed */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Force project details to be visible during print */
+  .project-detail {
+    display: block !important;
+    height: auto !important;
+    opacity: 1 !important;
+    background-color: transparent !important;
+  }
+
+  /* Optimize typography for print */
+  h1 { font-size: 24pt !important; }
+  h2 { font-size: 18pt !important; margin-top: 1.5rem !important; }
+  h3 { font-size: 14pt !important; }
+  p, li { font-size: 11pt !important; line-height: 1.4 !important; }
+
+  /* Remove shadows and borders that might look weird in PDF */
+  .shadow-sm, .shadow-xl {
+    box-shadow: none !important;
+    border: 1px solid #eee !important;
+  }
+
+  /* Ensure images don't break across pages */
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+
+  /* Add page margins */
+  @page {
+    margin: 2cm;
+  }
+}

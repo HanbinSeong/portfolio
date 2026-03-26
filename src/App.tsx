@@ -26,7 +26,7 @@ import { PERSONAL_INFO, SKILLS, PROJECTS, EXPERIENCES } from "./constants";
 
 export default function App() {
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
-  const [expandedProjectId, setExpandedProjectId] = useState<string | null>(null);
+  const [expandedProjectIds, setExpandedProjectIds] = useState<string[]>([]);
 
   const getYoutubeId = (url: string) => {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -40,7 +40,9 @@ export default function App() {
   };
 
   const toggleDetail = (title: string) => {
-    setExpandedProjectId(expandedProjectId === title ? null : title);
+    setExpandedProjectIds(prev => 
+      prev.includes(title) ? prev.filter(id => id !== title) : [...prev, title]
+    );
   };
 
   return (
@@ -204,10 +206,16 @@ export default function App() {
             {PROJECTS.map((project, index) => (
               <motion.div
                 key={project.title}
+                layout
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-3xl overflow-hidden border border-gray-100 group hover:shadow-xl transition-all w-full"
+                viewport={{ once: true }}
+                transition={{ 
+                  opacity: { duration: 0.5, delay: index * 0.1 },
+                  y: { duration: 0.5, delay: index * 0.1 },
+                  layout: { duration: 0.4, ease: "easeInOut" }
+                }}
+                className="bg-white rounded-3xl overflow-hidden border border-gray-100 group hover:shadow-xl transition-shadow w-full"
               >
                 <div className="grid md:grid-cols-[1fr_1.5fr] gap-0">
                   <div className="aspect-video md:aspect-auto overflow-hidden">
@@ -257,7 +265,7 @@ export default function App() {
                       onClick={() => toggleDetail(project.title)}
                       className="flex items-center gap-2 px-6 py-3 bg-blue-50 text-blue-600 rounded-full font-bold hover:bg-blue-100 transition-all"
                     >
-                      {expandedProjectId === project.title ? (
+                      {expandedProjectIds.includes(project.title) ? (
                         <>
                           <ChevronUp size={20} /> Close Detail
                         </>
@@ -270,12 +278,15 @@ export default function App() {
                   </div>
                 </div>
 
-                <AnimatePresence>
-                  {expandedProjectId === project.title && (
+                <AnimatePresence mode="wait">
+                  {expandedProjectIds.includes(project.title) && (
                     <motion.div
+                      key="content"
+                      layout
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.4, ease: "easeInOut" }}
                       className="overflow-hidden bg-gray-50/50"
                     >
                       <div className="p-8 md:p-12 border-t border-gray-100">

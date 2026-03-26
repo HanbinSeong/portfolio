@@ -1,11 +1,11 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Font, Image, Link } from '@react-pdf/renderer';
 import { PERSONAL_INFO, SKILLS, PROJECTS, EXPERIENCES } from '../constants';
 
 // Register Korean Font
 Font.register({
   family: 'NanumGothic',
-  src: 'https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/NanumGothic.ttf',
+  src: 'https://fonts.gstatic.com/ea/nanumgothic/v5/NanumGothic-Regular.ttf',
 });
 
 const styles = StyleSheet.create({
@@ -25,16 +25,17 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 4,
+    marginBottom: 8,
   },
   role: {
+    marginTop: 10,
     fontSize: 14,
     color: '#787774',
     marginBottom: 8,
   },
   contact: {
     flexDirection: 'row',
-    gap: 15,
+    // gap: 15,
     fontSize: 9,
     color: '#37352f',
   },
@@ -44,28 +45,32 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 15,
     color: '#1a1a1a',
     borderBottom: 1,
     borderBottomColor: '#f1f1f0',
-    paddingBottom: 4,
+    paddingBottom: 8,
   },
   bio: {
+    marginTop: 5,
     marginBottom: 10,
     textAlign: 'justify',
   },
   skillGroup: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 5,
+    marginTop: 5,
     marginBottom: 10,
   },
   skillBadge: {
     padding: '2 6',
     borderRadius: 4,
     fontSize: 8,
+    marginRight: 5,   // gap 대신 여백 추가
+    marginBottom: 5,  // 줄바꿈 시 상하 여백을 위해 추가
   },
   experienceItem: {
+    marginTop: 5,
     marginBottom: 12,
   },
   experienceHeader: {
@@ -93,6 +98,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   projectItem: {
+    marginTop: 5,
     marginBottom: 15,
     padding: 10,
     backgroundColor: '#f7f6f3',
@@ -111,7 +117,21 @@ const styles = StyleSheet.create({
   projectContent: {
     fontSize: 9,
     color: '#37352f',
-  }
+    marginBottom: 4,
+  },
+  // 이미지 스타일 추가
+  projectImage: {
+    marginVertical: 10,
+    maxWidth: '100%',
+    maxHeight: 400,
+    borderRadius: 4,
+    objectFit: 'contain',
+  },
+  // 2. 하이퍼링크용 텍스트 스타일 추가
+  linkText: {
+    color: '#0066cc',          // 링크 파란색
+    textDecoration: 'none',    // 혹은 'underline' (취향에 맞게 선택)
+  },
 });
 
 // Simple markdown stripper for PDF
@@ -129,6 +149,50 @@ const stripMarkdown = (text: string) => {
     .trim();
 };
 
+// 텍스트와 이미지를 분리하여 렌더링하는 함수 추가
+const renderContentWithImages = (content: string) => {
+  const imageRegex = /!\[.*?\]\((.*?)\)/g;
+  const elements = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = imageRegex.exec(content)) !== null) {
+    // 이미지 이전의 텍스트 처리
+    if (match.index > lastIndex) {
+      const textPart = content.slice(lastIndex, match.index);
+      if (textPart.trim()) {
+        elements.push(
+          <Text key={`text-${lastIndex}`} style={styles.projectContent}>
+            {stripMarkdown(textPart)}
+          </Text>
+        );
+      }
+    }
+
+    // 추출한 이미지 URL로 Image 컴포넌트 생성 (match[1]에 URL이 담김)
+    const imageUrl = match[1];
+    elements.push(
+      <Image key={`img-${match.index}`} src={imageUrl} style={styles.projectImage} />
+    );
+
+    lastIndex = imageRegex.lastIndex;
+  }
+
+  // 마지막 이미지 이후 남은 텍스트 처리
+  if (lastIndex < content.length) {
+    const remainingText = content.slice(lastIndex);
+    if (remainingText.trim()) {
+      elements.push(
+        <Text key={`text-last`} style={styles.projectContent}>
+          {stripMarkdown(remainingText)}
+        </Text>
+      );
+    }
+  }
+
+  return elements.length > 0 ? elements : <Text style={styles.projectContent}>{stripMarkdown(content)}</Text>;
+};
+
 export const PortfolioPDF = () => (
   <Document title={`${PERSONAL_INFO.name} Portfolio`}>
     <Page size="A4" style={styles.page}>
@@ -137,8 +201,21 @@ export const PortfolioPDF = () => (
         <Text style={styles.name}>{PERSONAL_INFO.name}</Text>
         <Text style={styles.role}>{PERSONAL_INFO.role}</Text>
         <View style={styles.contact}>
-          <Text>Email: {PERSONAL_INFO.email}</Text>
-          <Text>GitHub: {PERSONAL_INFO.github}</Text>
+          <Text style={{ marginRight: 15 }}>Email: {PERSONAL_INFO.email}</Text>
+          {/* GitHub 링크 처리 */}
+          <Text style={{ marginRight: 15 }}>
+            GitHub:{' '}
+            <Link src={PERSONAL_INFO.github} style={styles.linkText}>
+              {PERSONAL_INFO.github}
+            </Link>
+          </Text>
+          {/* 웹 포트폴리오 링크 추가 */}
+          <Text>
+            포트폴리오 웹:{' '}
+            <Link src="https://hbdevportfolio.netlify.app/" style={styles.linkText}>
+              https://hbdevportfolio.netlify.app/
+            </Link>
+          </Text>
         </View>
       </View>
 
@@ -189,12 +266,13 @@ export const PortfolioPDF = () => (
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Projects</Text>
         {PROJECTS.map((project, i) => (
-          <View key={i} style={styles.projectItem} wrap={false}>
+          // 1. wrap={false}를 제거하여 페이지 넘김을 허용합니다.
+          <View key={i} style={styles.projectItem}>
             <Text style={styles.projectTitle}>{project.title}</Text>
             <Text style={styles.projectPeriod}>{project.period}</Text>
-            <Text style={styles.projectContent}>
-              {stripMarkdown(project.content).substring(0, 500)}...
-            </Text>
+            <View>
+              {renderContentWithImages(project.content)}
+            </View>
           </View>
         ))}
       </View>

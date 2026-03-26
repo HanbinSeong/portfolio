@@ -18,10 +18,13 @@ import {
   X,
   Play,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  FileDown
 } from "lucide-react";
 import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { PortfolioPDF } from "./components/PortfolioPDF.tsx";
 import { PERSONAL_INFO, SKILLS, PROJECTS, EXPERIENCES } from "./constants";
 
 export default function App() {
@@ -86,11 +89,29 @@ export default function App() {
       <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <span className="font-bold text-xl tracking-tight">PORTFOLIO</span>
-          <div className="hidden md:flex gap-8 text-sm font-medium text-gray-500">
-            <a href="#about" className="hover:text-black transition-colors">About</a>
-            <a href="#skills" className="hover:text-black transition-colors">Skills</a>
-            <a href="#projects" className="hover:text-black transition-colors">Projects</a>
-            <a href="#experience" className="hover:text-black transition-colors">Experience</a>
+          <div className="flex items-center gap-4 md:gap-8">
+            <div className="hidden md:flex gap-8 text-sm font-medium text-gray-500">
+              <a href="#about" className="hover:text-black transition-colors">About</a>
+              <a href="#skills" className="hover:text-black transition-colors">Skills</a>
+              <a href="#experience" className="hover:text-black transition-colors">Experience</a>
+              <a href="#projects" className="hover:text-black transition-colors">Projects</a>
+            </div>
+            <PDFDownloadLink
+              document={<PortfolioPDF />}
+              fileName={`portfolio_${PERSONAL_INFO.name.split(' ')[0]}.pdf`}
+            >
+              {({ loading }) => (
+                <button
+                  disabled={loading}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-bold hover:bg-blue-700 transition-all shadow-sm no-print disabled:opacity-50"
+                >
+                  <FileDown size={16} />
+                  <span className="hidden sm:inline">
+                    {loading ? "생성 중..." : "PDF 추출"}
+                  </span>
+                </button>
+              )}
+            </PDFDownloadLink>
           </div>
         </div>
       </nav>
@@ -189,6 +210,48 @@ export default function App() {
                 className="px-5 py-2.5 rounded-md font-bold text-sm shadow-sm flex items-center gap-2 cursor-default select-none"
               >
                 <span className="tracking-wider">{skill.name}</span>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* Experience Section */}
+        <section id="experience" className="mb-32 scroll-mt-32">
+          <div className="flex items-center gap-3 mb-12">
+            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+              <Briefcase size={24} />
+            </div>
+            <h2 className="text-3xl font-bold">Experience</h2>
+          </div>
+          <div className="space-y-8">
+            {EXPERIENCES.map((exp, index) => (
+              <motion.div
+                key={exp.role || index}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="relative pl-8 border-l-2 border-gray-100 pb-8 last:pb-0"
+              >
+                <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-blue-600 border-4 border-white shadow-sm" />
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
+                  <div>
+                  {exp.role && (
+                    <h3 className="text-xl font-bold">{exp.role}</h3>
+                  )}
+                  {exp.company && (
+                    <p className="text-blue-600 font-semibold">{exp.company}</p>
+                  )}
+                  </div>
+                  <span className="text-sm font-medium text-gray-400 mt-1 md:mt-0">{exp.period}</span>
+                </div>
+                <ul className="space-y-2">
+                  {exp.description.map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-gray-600">
+                      <ChevronRight size={18} className="mt-1 flex-shrink-0 text-blue-400" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
               </motion.div>
             ))}
           </div>
@@ -387,48 +450,14 @@ export default function App() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
-        {/* Experience Section */}
-        <section id="experience" className="mb-32 scroll-mt-32">
-          <div className="flex items-center gap-3 mb-12">
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-              <Briefcase size={24} />
-            </div>
-            <h2 className="text-3xl font-bold">Experience</h2>
-          </div>
-          <div className="space-y-8">
-            {EXPERIENCES.map((exp, index) => (
-              <motion.div
-                key={exp.role || index}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="relative pl-8 border-l-2 border-gray-100 pb-8 last:pb-0"
-              >
-                <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-blue-600 border-4 border-white shadow-sm" />
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
-                  <div>
-                  {exp.role && (
-                    <h3 className="text-xl font-bold">{exp.role}</h3>
-                  )}
-                  {exp.company && (
-                    <p className="text-blue-600 font-semibold">{exp.company}</p>
-                  )}
+                {/* Print-only detail view (always visible when printing) */}
+                <div className="hidden print:block p-8 md:p-12 border-t border-gray-100 bg-white">
+                  <div className="prose prose-slate prose-sm max-w-none text-[#37352f]">
+                    <Markdown rehypePlugins={[rehypeRaw]}>
+                      {project.content}
+                    </Markdown>
                   </div>
-                  <span className="text-sm font-medium text-gray-400 mt-1 md:mt-0">{exp.period}</span>
                 </div>
-                <ul className="space-y-2">
-                  {exp.description.map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-gray-600">
-                      <ChevronRight size={18} className="mt-1 flex-shrink-0 text-blue-400" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
               </motion.div>
             ))}
           </div>
